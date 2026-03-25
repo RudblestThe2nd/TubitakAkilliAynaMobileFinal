@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Smart Mirror (Debug)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "program": "lib/main.dart",
+      "env": {
+        "GRADLE_USER_HOME": "C:/gradle_home"
+      }
+    }
+  ]
+}

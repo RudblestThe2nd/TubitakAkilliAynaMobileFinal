@@ -239,3 +239,34 @@ Flutter uygulamasinin tamamini sifirdan gelistirdi:
 ---
 
 TUBITAK 2209-A - Firat Universitesi - 2025-2026
+
+---
+
+# PDF Proje Onerisi ile Gerceklesen Uygulama Arasindaki Farklar
+
+TUBITAK 2209-A basvuru formu (2024/1. Donem) ile teslim edilen uygulamanin teknik karsilastirmasi asagida verilmistir.
+
+| # | Konu | PDF'deki Plan | Gerceklesen | Degisikligin Nedeni |
+|---|------|--------------|-------------|---------------------|
+| 1 | Dil & Framework | Java (Android) + Swift (iOS) | Dart + Flutter | Tek kod tabanıyla cift platform ciktisi; gelistirme suresi yaklasik yuzde 40 kisaldi. Iki ayri ekip ve iki ayri kod tabani gerekmedi. |
+| 2 | Frontend | React Native | Flutter Widget sistemi | Native ARM'a derleme; JavaScript koprusu yok; sesli komut gecikmesi azaldi; 60 fps animasyon. |
+| 3 | AI Kutuphanesi | TensorFlow 2.x (dogrudan mobil) | HuggingFace Inference API | Model sunucuda kalir, telefona yalnizca cikarim sonucu gelir. Batarya ve RAM tasarrufu; model guncellemeleri uygulama yayinlamadan yapilir. |
+| 4 | NLP Kutuphanesi | NLTK (Python) | speech_to_text + flutter_tts (tr_TR) | NLTK sunucu taraflidir, mobil uygulama dogrudan konusamaz. Flutter paketleri cihaz ici ve bulut tanımayi sorunsuz entegre eder; Turkce aksanlar icin optimize. |
+| 5 | State Management | Belirtilmemis | BLoC/Cubit (TaskBloc, UserCubit, VoiceCubit) | Katmanli ve test edilebilir mimari. Yeni ozellik eklendiginde mevcut kod bozulmaz. |
+| 6 | Mimari | Mikro hizmetler + Docker | Clean Architecture (Presentation - Domain - Data) | Mikro hizmet bu olcek icin fazla karmasik. Clean Architecture ayni faydalari cok daha az altyapi maliyetiyle sunar. |
+| 7 | Dependency Injection | Belirtilmemis | GetIt 7.6.7 (Service Locator) | Test ortaminda mock enjeksiyonu kolaylasr; servisler merkezi yonetilir; prop drilling ortadan kalkar. |
+| 8 | PIN Guvenligi | Blockchain onerilmis | SHA-256 + Android Keystore / iOS Keychain | Blockchain bu olcek icin orantisiz. SHA-256 + Keystore endustri standardi; ham PIN hicbir zaman cihazda saklanmaz. |
+| 9 | TLS | TLS 1.2 | Sertifika parmak izi dogrulamasi (Dio interceptor) | MITM saldirilarinа karsi ek katman. Gelistirmede self-signed sertifika destegi ile sertifika maliyeti olmadan test edilir. |
+| 10 | Veritabani | SQLite 3.x | sqflite 2.3.3 (migration destekli v2 semasi) | Ayni teknoloji, Flutter uyumlu sarmalayici. Migration destegi sayesinde uygulama guncellemelerinde mevcut kullanici verileri kaybolmaz. |
+| 11 | HTTP Istemcisi | Belirtilmemis | Dio 5.4.3 (interceptor, retry, TLS) | Authorization, X-Device-ID ve X-API-Version basliklari tum isteklere otomatik eklenir. |
+| 12 | Hata Yonetimi | Belirtilmemis | Either<Failure, T> — dartz 0.10.1 | Derleyici hata durumlarini islemeyi zorunlu kilar. Runtime exception yerine ongorelebilir hata akisi. |
+| 13 | Izleme Araclari | Prometheus + Grafana + Nagios | flutter_local_notifications 17.0.0 | Prometheus/Grafana/Nagios sunucu altyapisi gerektirir. Lokal bildirimler kullanici deneyimini dogrudan etkiler (ileri izleme v1.1'e ertelendi). |
+| 14 | Coklu Kullanici | Kavramsal duzeyде onerılmıs | PIN dogrulama + Admin/Member rol sistemi + profil degisiminde anlik veri sifirlama | Her aile uyesinin gorevleri tamamen izole. Profil gecisi PIN gerektirdiginden mahremiyet korunur. |
+| 15 | Gorev Yonetimi | Temel plan, gorev, hatirlatma | 4 oncelik seviyesi + 7 kategori + tam metin arama + otomatik gizleme (24 saat) + swipe-to-delete | Kullanici en kritik gorevlere aninda odaklanabilir. Tamamlanan gorevlerin otomatik gizlenmesi arayuzu temiz tutar. |
+| 16 | Danisman Unvani | Dr. Sinem Akyol | Doc. Dr. Sinem Akyol | Guncel akademik unvan ile dogruluk ve kurumsal taninirlik saglandi. |
+| 17 | Cevrimdisi Mod | Belirtilmemis | Kural tabanli yerel yanit motoru (_buildOfflineResponse) | Ag baglantisi garanti edilemez. Yerel motor temel sorgulari cevrimdisi yanitlar; hata mesaji yerine anlamli yanit doner. |
+| 18 | Turkce Karakter Destegi | Belirtilmemis | Noto Sans font + intl paketi (tr_TR locale) | Varsayilan sistem fontlari bazi Android surumlerinde Turkce karakterleri hatali render eder. |
+
+---
+
+TUBITAK 2209-A - Firat Universitesi - 2025-2026

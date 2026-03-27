@@ -193,7 +193,7 @@ Ilk acilista mutlaka profil olusturun. Profil olmadan dashboard bos gelir.
 
 ## Efor Dagilimi
 
-### Sevval Kaya — %25
+### Sevval Kaya — %30
 
 Flutter uygulamasinin temel iskeleti:
 
@@ -207,22 +207,8 @@ Flutter uygulamasinin temel iskeleti:
 
 ---
 
-### Berkay Parcal — %45
+### Berkay Parcal — %40
 
-### Flutter Uygulamasındaki Kritik Sorunlar
-
-uygulama ilk calismada birden fazla kritik sorunla geldi. Bu sorunlarin tamamini tespit edip duzeltmek Berkay ve Esra'ya dustu:
-
-| # | Sorun | Aciklama | Cozum |
-|---|-------|----------|-------|
-| 1 | **VoiceCubit crash** | Sesli komut butonuna basildiginda uygulama aninda cokuyordu. `injection_container.dart`'ta VoiceCubit'e TaskBloc inject edilmemisti. | `registerFactory` → `registerFactoryParam` degisikligi yapildi. |
-| 2 | **Ilk acilista login ekrani yoktu** | Uygulama direkt dashboard'a aciliyordu. Hic profil yoktu, gorev yoktu, context bosti, model hep "planin bulunmuyor" diyordu. | `first_setup_page.dart` sifirdan yazildi; animasyonlu hosgeldin ekrani, 2 adimli profil olusturma akisi ve otomatik dashboard yonlendirmesi eklendi. |
-| 3 | **Demo verisi yoktu** | Her acilista sifirdan elle gorev girilmesi gerekiyordu, bu test surecini ciddi sekilde zorlastirdi. | `_seedDemoTasks()` yazildi, ilk kullanici olusturulunca 16 ornek gorev otomatik ekleniyor. |
-| 4 | **Saat alani yoktu** | Tarih secici vardi ama saat secici yoktu. Tum gorevler 00:00 saatiyle kaydediliyordu. "Bugun sabah ne var" sorgusuna hic yanit gelmiyordu, filtreler hep bos donuyordu. | `showTimePicker` eklendi, tarih secilince saat secici otomatik aciyor, saat `dueDate`'e isleniyor. |
-| 5 | **Context bos geliyordu** | `_buildTaskContext` gorev tarihlerini yanlis filtreliyordu, `dueDate` null olan gorevleri atliyordu. | Akilli filtreleme yeniden yazildi: bugun/yarin/X Mart/bu hafta tarih algisi ve sabah/ogleden once/ogle/ogleden sonra/aksam/gece zaman dilimi algisi eklendi. |
-| 6 | **`ai_remote_datasource.dart` dead code** | Dosyanin aciklamasi "NGINX AI endpoint istemcisi" yaziyordu. NGINX nerede? Raspberry Pi'da. Raspberry Pi nerede? Yok. Model telefonda mi calisacakti? 8GB model icin telefon RAM'i yetmez. Bu dosya hic cagrilmadan projede kaldi. | Tum AI cagrilan `api_service.dart` uzerinden sifirdan yazildi. |
-| 7 | **`192.168.1.100` hardcode IP** | `security_layer.dart` TLS, JWT token ve cihaz ID sifreleme ile guc gosterisi yapiyordu ama hepsi `192.168.1.100`'e bagliydi. Baska aga gecinle baglanti aninda kesildi. Guvenlik katmani o kadar saglamdi ki kendini de mahkum etti. | `dart-define` ile environment variable'a tasindi, HF Endpoint'e gecildi, IP bagimliliginin koku kazindi. |
-| 8 | **`IAiRemoteDataSource` inject edilmemisti** | Interface var, class var, GetIt'e kayitli, her sey mevcut. Bir tek eksik: VoiceCubit'e inject edilmemis. Sesli komut butonuna basilinca `Null check operator used on a null value` hatasi ile uygulama cokuyor. | `injection_container.dart`'ta `registerFactory` → `registerFactoryParam` ile duzeltildi. |
 
 **Yeni Ozellikler**
 
@@ -248,7 +234,7 @@ uygulama ilk calismada birden fazla kritik sorunla geldi. Bu sorunlarin tamamini
 
 ---
 
-### Esra Kazan — %30
+### Esra Kazan — %35
 
 - QLoRA fine-tuning icin dataset hazirlanmasi ve veri temizligi
 - 3000 ornek uzerinde cikti kalitesi kontrolu ve duzeltmesi
@@ -258,6 +244,23 @@ uygulama ilk calismada birden fazla kritik sorunla geldi. Bu sorunlarin tamamini
 - Prometheus/Grafana kurulumu ve yapilandirmasi
 - TUBITAK raporu yazimi ve duzenlenmesi
 - Test senaryolari hazirlama ve uygulama uzerinde test
+
+### Esra Kazan ve Berkay Parçal Ortak çalışma 
+
+## Flutter Uygulamasındaki Kritik Sorunlar
+
+uygulama ilk calismada birden fazla kritik sorunla geldi. Bu sorunlarin tamamini tespit edip duzeltmek Berkay ve Esra'ya dustu:
+
+| # | Sorun | Aciklama | Cozum |
+|---|-------|----------|-------|
+| 1 | **VoiceCubit crash** | Sesli komut butonuna basildiginda uygulama aninda cokuyordu. `injection_container.dart`'ta VoiceCubit'e TaskBloc inject edilmemisti. | `registerFactory` → `registerFactoryParam` degisikligi yapildi. |
+| 2 | **Ilk acilista login ekrani yoktu** | Uygulama direkt dashboard'a aciliyordu. Hic profil yoktu, gorev yoktu, context bosti, model hep "planin bulunmuyor" diyordu. | `first_setup_page.dart` sifirdan yazildi; animasyonlu hosgeldin ekrani, 2 adimli profil olusturma akisi ve otomatik dashboard yonlendirmesi eklendi. |
+| 3 | **Demo verisi yoktu** | Her acilista sifirdan elle gorev girilmesi gerekiyordu, bu test surecini ciddi sekilde zorlastirdi. | `_seedDemoTasks()` yazildi, ilk kullanici olusturulunca 16 ornek gorev otomatik ekleniyor. |
+| 4 | **Saat alani yoktu** | Tarih secici vardi ama saat secici yoktu. Tum gorevler 00:00 saatiyle kaydediliyordu. "Bugun sabah ne var" sorgusuna hic yanit gelmiyordu, filtreler hep bos donuyordu. | `showTimePicker` eklendi, tarih secilince saat secici otomatik aciyor, saat `dueDate`'e isleniyor. |
+| 5 | **Context bos geliyordu** | `_buildTaskContext` gorev tarihlerini yanlis filtreliyordu, `dueDate` null olan gorevleri atliyordu. | Akilli filtreleme yeniden yazildi: bugun/yarin/X Mart/bu hafta tarih algisi ve sabah/ogleden once/ogle/ogleden sonra/aksam/gece zaman dilimi algisi eklendi. |
+| 6 | **`ai_remote_datasource.dart` dead code** | Dosyanin aciklamasi "NGINX AI endpoint istemcisi" yaziyordu. NGINX nerede? Raspberry Pi'da. Raspberry Pi nerede? Yok. Model telefonda mi calisacakti? 8GB model icin telefon RAM'i yetmez. Bu dosya hic cagrilmadan projede kaldi. | Tum AI cagrilan `api_service.dart` uzerinden sifirdan yazildi. |
+| 7 | **`192.168.1.100` hardcode IP** | `security_layer.dart` TLS, JWT token ve cihaz ID sifreleme ile guc gosterisi yapiyordu ama hepsi `192.168.1.100`'e bagliydi. Baska aga gecinle baglanti aninda kesildi. Guvenlik katmani o kadar saglamdi ki kendini de mahkum etti. | `dart-define` ile environment variable'a tasindi, HF Endpoint'e gecildi, IP bagimliliginin koku kazindi. |
+| 8 | **`IAiRemoteDataSource` inject edilmemisti** | Interface var, class var, GetIt'e kayitli, her sey mevcut. Bir tek eksik: VoiceCubit'e inject edilmemis. Sesli komut butonuna basilinca `Null check operator used on a null value` hatasi ile uygulama cokuyor. | `injection_container.dart`'ta `registerFactory` → `registerFactoryParam` ile duzeltildi. |
 
 # PDF Proje Onerisi ile Gerceklesen Uygulama Arasindaki Farklar
 

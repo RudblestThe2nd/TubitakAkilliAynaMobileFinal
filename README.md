@@ -1,84 +1,24 @@
-# TubitakAkilliAynaMobileFinal
+# Akilli Ayna - Flutter Mobil Uygulama
 
-TUBITAK 2209-A - Yapay Zeka Destekli Akilli Ayna
-Flutter Android Mobil Uygulama | Hugging Face AI Entegrasyonu
+TUBITAK 2209-A - Yapay Zeka Destekli Akilli Ayna Projesi
+Flutter Android Mobil Uygulama
 
 Danisman: Doc. Dr. Sinem Akyol
 Koordinator: Sevval Kaya
 Gelistirici: Berkay Parcal
 Gelistirici: Esra Kazan
-
-
----
-
-# AkilliAyna-Qwen3B
-
-Bu depo, akıllı ayna (Smart Mirror) projelerinde sanal asistan olarak kullanılmak üzere optimize edilmiş AkıllıAyna-Qwen3B dil modelinin kullanım rehberini ve kaynaklarını içermektedir. Model, Qwen-3B mimarisi temel alınarak düşük donanımlı cihazlarda (örneğin Raspberry Pi) nispeten hızlı çalışabilmesi amacıyla tasarlanmıştır.
-
-## Hugging Face Modeli
-
-Modelin ağırlıklarına (weights) ve konfigürasyon dosyalarına doğrudan Hugging Face üzerinden ulaşabilirsiniz:
-
-Hugging Face Reposu: [Rudblest/AkilliAyna-Qwen3B](https://huggingface.co/Rudblest/AkilliAyna-Qwen3B)
-
-## Özellikler
-
-* Hızlı ve Hafif: 3 Milyar parametreli (3B) yapısı sayesinde akıllı ayna gibi gömülü sistemlerde veya yerel sunucularda çalışmaya uygundur.
-* Türkçe Destekli: Akıllı ayna ile doğal dilde Türkçe iletişim kurabilmeniz için asistan yeteneklerine sahiptir.
-* Kolay Entegrasyon: Python ve transformers kütüphanesi ile kısa sürede projeye dahil edilebilir.
-
-## Kurulum ve Kullanım
-
-Modeli kendi bilgisayarınızda veya akıllı ayna donanımınızda çalıştırmak için öncelikle gerekli kütüphaneleri yükleyin:
-
-pip install transformers torch
-
-Ardından aşağıdaki Python kodu ile modeli projenize entegre edip test edebilirsiniz:
-
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
-
-# Hugging Face repo yolu
-model_id = "Rudblest/AkilliAyna-Qwen3B"
-
-# Tokenizer ve Modeli yükleme
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModelForCausalLM.from_pretrained(
-    model_id, 
-    torch_dtype=torch.float16, # Donanımınıza göre optimize edebilirsiniz
-    device_map="auto"
-)
-
-# Modele gönderilecek soru
-prompt = "Merhaba, bugünkü hava durumu hakkında bana ne söyleyebilirsin?"
-inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-
-# Yanıt üretme
-outputs = model.generate(**inputs, max_new_tokens=100)
-response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-print(response)
-
-## Katkıda Bulunma
-
-Projeyi geliştirmek, yeni özellikler eklemek veya hataları bildirmek isterseniz Issues kısmından geri bildirimde bulunabilir veya Pull Request gönderebilirsiniz.
-
-## Lisans
-
-Bu proje MIT lisansı altında sunulmaktadır. (Qwen modelinin kendi kullanım lisanslarına da ayrıca dikkat edilmelidir.)
+Kurum: Firat Universitesi
 
 ---
 
 # Ekran Goruntuleri
 
-### Uygulama Ekranlari
-
 | Izin Ekrani | Hosgeldin | Profil Olustur |
-|-------------|-----------|---------------|
+|-------------|-----------|----------------|
 | ![Izin](screenshots/izin.jpg) | ![Hosgeldin](screenshots/hosgeldin.jpg) | ![Profil Olustur](screenshots/profil_olustur.jpg) |
 
-| Profil Olustur (Rol) | Ana Ekran | Gorevler |
-|---------------------|-----------|----------|
+| Profil Rol | Ana Ekran | Gorevler |
+|------------|-----------|----------|
 | ![Profil Rol](screenshots/profil_olustur_rol.jpg) | ![Ana Ekran](screenshots/anaekran.jpeg) | ![Gorevler](screenshots/gorev.jpg) |
 
 | Profil |
@@ -89,60 +29,104 @@ Bu proje MIT lisansı altında sunulmaktadır. (Qwen modelinin kendi kullanım l
 
 # Proje Nedir?
 
-Bu uygulama, TUBITAK 2209-A kapsaminda gelistirilen yapay zeka destekli akilli ayna projesinin Android mobil uygulamasidir. Kullanici sesli komutlarla gundelik gorevlerini yonetebilir, yapay zeka asistaniyla konusabilir.
+TUBITAK 2209-A kapsaminda Firat Universitesi'nde gelistirilen yapay zeka destekli akilli ayna sisteminin Android mobil uygulamasidir.
 
-Yapay zeka modeli Hugging Face uzerinde barindirılmaktadir. Yerel bir sunucu kurmaniza gerek yoktur, internet baglantisi yeterlidir.
+Kullanici Bluetooth mikrofona konusur, uygulama sesi metne cevirir, yapay zeka modeli yanit uretir ve yanit sesli olarak hoparlorden okunur. Tum bunlar telefon uygulamasi uzerinden yonetilir.
 
 ---
 
-# Nasil Calisir?
+# Sistem Mimarisi
 
 ```
-Kullanici mikrofon butonuna basar ve konusur
-      |
-Uygulama sesi metne cevirir (speech-to-text, Turkce)
-      |
-Metin ve gorev listesi Hugging Face API'ye gonderilir
-      |
-Fine-tuned Qwen2.5-3B modeli yanit uretir
-      |
-Yanit sesli olarak okunur (text-to-speech, Turkce)
+Bluetooth Mikrofon
+        |
+Flutter Android App (speech_to_text tr_TR)
+        |
+Intent Ayirici (api_service.dart)
+        |
+   +----+----+----+
+   |         |    |
+Gorev     Hava  Sohbet
+Sorgusu  Durumu
+   |         |    |
+Direkt   OpenWea  Groq API
+Metin    therMap  (Llama 3.1 8B)
+(model    API
+bypass)
+        |
+flutter_tts (tr-TR)
+        |
+Bluetooth Hoparlor
 ```
+
+Gorev sorgularinda (bugun ne var, yarin programim vb.) model devreye girmez. SQLite'tan cekilen gorev listesi direkt okunabilir metne donusturulur. Bu sayede hic hallusinasyon olmuyor.
+
+Hava durumu sorularinda OpenWeatherMap API kullanilir, gercek veri gelir.
+
+Gundelik sohbet, motivasyon, genel sorularda Groq API uzerinden Llama 3.1 8B modeli devreye girer.
 
 ---
 
 # Ozellikler
 
-- Sesli komutla gorev sorgulama (bugun ne var, yarin programim ne vb.)
-- Sesle gorev ekleme (gorev ekle, hatirla, not al vb.)
-- Coklu kullanici destegi (PIN korumali profiller)
-- Zaman dilimi algisi (sabah, ogleden sonra, aksam)
-- Conversation history (son 5 tur hatirlama)
-- Hallusinasyon engelleme (gorev yoksa model uydurma yapmaz)
-- Hugging Face API entegrasyonu (yerel sunucu gerekmez)
+**Sesli Komut ve AI Asistan**
+
+- Sesli gorev sorgulama: bugun ne var, yarin sabah planlarim, cumartesi programim
+- Zaman dilimi algisi: sabah (05-17), ogleden once (00-12), ogle (11-13), ogleden sonra (12-24), aksam/gece (17-05)
+- Haftanin gunu algisi: pazartesi, sali, carsamba, persembe, cuma, cumartesi, pazar
+- Tarihli sorgu: "29 Mart'ta ne var", "3 Mart gecesi planlarim"
+- Sesle gorev ekleme: "gorev ekle", "hatirla", "not al", "listeye ekle"
+- Saat ve tarih cikarimi: "yarin saat 14'e toplanti ekle", "aksam ilac al"
+- Hava durumu: "Elazig'da hava nasil", "Istanbul'da sicaklik kac derece"
+- Gundelik sohbet: Groq Llama 3.1 8B ile dogal Turkce sohbet
+- Conversation history: son 5 tur RAM'de saklanir, her istekte gonderilir
+- Hallusinasyon engelleme: gorev yoksa model devreye girmez, direkt "planin bulunmuyor" doner
+
+**Gorev Yonetimi**
+
+- Gorev ekleme: baslik, aciklama, oncelik (acil/yuksek/orta/dusuk), kategori, tarih ve saat
+- Tamamlama, silme (swipe-to-delete), tam metin arama
+- Aktif / Tamamlanan sekme gorunumu
+- Gorev sesli okuma (gorev kartindaki buton)
+
+**Coklu Kullanici**
+
+- PIN korumal profiller (SHA-256)
+- Admin / Member / Guest rol sistemi
+- Profil gecisinde gorevler aninda sifirlaniyor (gizlilik)
+- Ilk acilista animasyonlu kurulum ekrani
+
+**Veri Analizi**
+
+| Genel Bakis | Tamamlanma Analizi | Zaman Analizi |
+|-------------|-------------------|---------------|
+| ![Genel Bakis](screenshots/grafik1_genel_bakis.png) | ![Tamamlanma](screenshots/grafik2_tamamlanma_analizi.png) | ![Zaman](screenshots/grafik3_zaman_analizi.png) |
 
 ---
 
 # Kullanilan Teknolojiler
 
-| Katman | Teknoloji |
-|--------|-----------|
-| Mobil Framework | Flutter (Android) |
-| State Management | BLoC / Cubit |
-| AI Modeli | Qwen2.5-3B-Instruct (QLoRA fine-tuned) |
-| Model Barindirilmasi | Hugging Face Inference API |
-| Ses Tanima | speech_to_text (tr_TR) |
-| Ses Sentezi | flutter_tts (tr-TR) |
-| Veritabani | SQLite (sqflite) |
-| Guvenlik | SHA-256 PIN, flutter_secure_storage |
-| HTTP | Dio |
-| DI | GetIt |
+| Katman | Teknoloji | Aciklama |
+|--------|-----------|----------|
+| Mobil Framework | Flutter 3.19+ | Android |
+| State Management | BLoC / Cubit | TaskBloc, UserCubit, VoiceCubit |
+| Gorev AI | Direkt Metin Uretimi | Model bypass, hallusinasyon yok |
+| Sohbet AI | Groq API (Llama 3.1 8B) | Gundelik sohbet |
+| Hava Durumu | OpenWeatherMap API | Gercek zamanli veri |
+| Fine-tuned Model | Qwen2.5-3B (HF Endpoint) | Yedek, suanda bypass |
+| Ses Tanima | speech_to_text (tr_TR) | |
+| Ses Sentezi | flutter_tts (tr-TR) | |
+| Veritabani | SQLite (sqflite 2.3.3) | Migration destekli v2 |
+| Guvenlik | SHA-256 + flutter_secure_storage | PIN hashleme |
+| HTTP | Dio 5.4.3 | |
+| DI | GetIt 7.6.7 | |
+| Animasyon | animate_do | |
 
 ---
 
 # Kurulum
 
-## 1. Depoyu Indirin
+## 1. Depoyu Klonlayin
 
 ```bash
 git clone https://github.com/RudblestThe2nd/TubitakAkilliAynaMobileFinal.git
@@ -155,91 +139,55 @@ cd TubitakAkilliAynaMobileFinal
 flutter pub get
 ```
 
-## 3. HF API Token Ayarini Yapin
-
-lib/core/constants/api_constants.dart dosyasini acin:
-
-```dart
-static const String hfToken = 'hf_SIZIN_TOKENINIZ';
-static const String hfModel = 'Rudblest/AkilliAyna-Qwen3B';
-```
-
-HuggingFace token almak icin: https://huggingface.co/settings/tokens
-
-## 4. Uygulamayi Telefona Yukleyin
-
-Telefonu USB ile baglayin, USB Hata Ayiklama acik olmalidir.
+## 3. Uygulamayi Calistirin
 
 ```bash
-flutter run
+flutter run \
+  --dart-define=HF_ENDPOINT_URL=https://os5jbu2fismdzpy8.us-east-1.aws.endpoints.huggingface.cloud \
+  --dart-define=HF_TOKEN=hf_SIZIN_TOKENINIZ \
+  --dart-define=GROQ_TOKEN=gsk_SIZIN_TOKENINIZ \
+  --dart-define=WEATHER_TOKEN=SIZIN_TOKENINIZ
+```
+
+Token almak icin:
+- HF Token: https://huggingface.co/settings/tokens
+- Groq Token: https://console.groq.com
+- OpenWeatherMap Token: https://openweathermap.org/api
+
+---
+
+# Ornek Sesli Komutlar
+
+```
+"Bugun ne yapacagim"
+"Yarin sabah planlarim neler"
+"Cumartesi programim ne"
+"29 Mart'ta ne var"
+"Ogleden once gorevlerim neler"
+"Aksam bos saatlerim var mi"
+"Elazig'da hava nasil"
+"Istanbul'da kac derece"
+"Gorev ekle yarin saat 14 toplanti"
+"Hatirla aksam ilac al"
+"Cok yorgunum ne yapmaliyim"
+"Nasil motive olabilirim"
 ```
 
 ---
 
-# Uygulamayi Kullanmak
+# Sik Sorulan Sorular
 
-Uygulama ilk acildiginda izin ekrani gorulur. Onaylayip devam edin.
+**Yapay zeka yanlis cevap veriyor:**
+Once Gorevler sekmesinden tarih ve saat girerek gorev ekleyin. Saat girilmezse zaman dilimi algisi (sabah/aksam vb.) calismiyor.
 
-Profil olusturun: isim, PIN ve rol secin. Birden fazla aile uyesi farkli profil olusturabilir.
+**Hava durumu gelmiyor:**
+OpenWeatherMap API token'i yeni alinmissa aktif olmasi 10 dakika - 2 saat surabilir.
 
-Gorev eklemek icin alt menudeki Gorevler sekmesinden + butonuna basin.
+**Ses tanimiyor:**
+Mikrofon izninin acik oldugunu kontrol edin. Emulatorlerde mikrofon sinirli calisir, gercek cihaz tercih edin.
 
-Sesli asistan icin ana sayfadaki mikrofon butonuna basin ve konusun.
-
-Ornek sesli komutlar:
-- "Bugun ne yapacagim"
-- "Yarin programim ne"
-- "Bu hafta ne var"
-- "Sabah planim nedir"
-- "Gorev ekle yarin saat 10 toplanti"
-- "Hatirla aksam ilac al"
-
----
-
-# Sistem Izleme (Prometheus + Grafana)
-
-> Bu bolum model yuklendikten sonra doldurulacaktir.
-
-Backend Prometheus metrikleri ve Grafana dashboard goruntuleri buraya eklenecektir.
-
----
-
-# Veri Analizi (SPSS / R / Python)
-
-> Bu bolum analiz tamamlandiktan sonra doldurulacaktir.
-
-SQLite veritabanindan uretilen istatistik grafikleri buraya eklenecektir.
-
-| Genel Bakis | Tamamlanma Analizi | Zaman Analizi |
-|-------------|-------------------|---------------|
-| ![ Genel Bakis](screenshots/grafik1_genel_bakis.png) | ![Tamamlanma](screenshots/grafik2_tamamlanma_analizi.png) | ![Zaman](screenshots/grafik3_zaman_analizi.png) |
-
----
-
-# Sık Sorulan Sorular
-
-AI yanit vermiyor:
-HF token'inin dogru girildiginden emin olun. Token okuma iznine sahip olmalidir.
-
-Yanit cok yavas geliyor:
-HF Inference API ucretsiz planda soguk baslangic yasanabilir. Ilk istek 30-60 saniye surebilir, sonrakiler daha hizli olur.
-
-Uygulama telefona yuklenmiyor:
-USB Hata Ayiklama seceneginin acik oldugunu kontrol edin.
-
-Yapay zeka yanlis cevap veriyor:
-Once Gorevler sekmesinden gorev ekleyin, sonra sorun. Gorev olmadan model "planin bulunmuyor" der.
-
----
-
-# Ana Repo (Backend + LLM)
-
-Backend, fine-tuning scriptleri ve model egitimi icin ana repo:
-https://github.com/RudblestThe2nd/AkilliAynaAsistanLLM
-
----
-
-TUBITAK 2209-A - Firat Universitesi - 2025-2026
+**Uygulama profil ekraninda kaliyor:**
+Ilk acilista mutlaka profil olusturun. Profil olmadan dashboard bos gelir.
 
 ---
 
@@ -249,83 +197,88 @@ TUBITAK 2209-A - Firat Universitesi - 2025-2026
 
 Flutter uygulamasinin tamamini sifirdan gelistirdi:
 
-- TaskBloc: gorev CRUD islemleri, filtreleme, tamamlama, arama
-- UserCubit: coklu kullanici yonetimi, SHA-256 ile PIN hashleme, rol sistemi (Admin/Member/Guest)
-- VoiceCubit: STT, AI ve TTS arasindaki akis yonetimi altyapisi
-- SQLite veritabani: tasks ve users tablolari, migration destekli v2 yapisi
-- Sayfalar: consent_page (izin ekrani), dashboard_page (ana panel), tasks_page (gorev listesi), profile_page (profil yonetimi)
-- Widgetlar: task_card_widget (swipe-to-delete ile gorev karti), voice_assistant_widget (mikrofon + TTS durum)
-- flutter_secure_storage ile Android Keystore / iOS Keychain sifreleme
-- flutter_local_notifications ile gorev hatirlaticilari
-- Noto Sans font ile tam Turkce karakter destegi, koyu tema, animate_do animasyonlari
-- iOS ve Android destegi
-- Gorev sesli okuma ozelligi (gorev karti uzerindeki buton)
-- Swipe to delete + onay diyalogu
-- Gunluk selamlama mesajlari (sabah / ogleden sonra / aksam)
+- Clean Architecture mimarisi (Presentation / Domain / Data / Core katmanlari)
+- TaskBloc: gorev CRUD, filtreleme, tamamlama, arama
+- UserCubit: coklu kullanici, SHA-256 PIN, rol sistemi (Admin/Member/Guest)
+- VoiceCubit: STT, AI ve TTS akis yonetimi altyapisi
+- SQLite veritabani: tasks ve users tablolari, migration destekli v2
+- Sayfalar: consent_page, dashboard_page, tasks_page, profile_page
+- Widgetlar: task_card_widget (swipe-to-delete), voice_assistant_widget
+- flutter_secure_storage ile token sifreleme
+- flutter_local_notifications ile gorev hatirlatic
+- Noto Sans font, koyu tema, animate_do animasyonlari
 - Fiziksel ayna kurulumu: Bluetooth mikrofon ve hoparlor montaji
 
----
+## Berkay Parcal + Esra Kazan - LLM, Backend ve Entegrasyon
 
-## Berkay Parcal + Esra Kazan - LLM, Backend ve Uygulama Entegrasyonu
+**Flutter Uygulamasina Eklenenler**
 
-### Flutter Uygulamasina Eklenenler
+- Dependency injection fix: VoiceCubit'e TaskBloc inject edilmemesinden kaynaklanan crash giderildi
+- Ilk kurulum ekrani (first_setup_page.dart): animasyonlu hosgeldin, 2 adimli profil akisi
+- Demo seed verisi: ilk kullanici olusturulunca 16 ornek gorev otomatik ekleniyor
+- Context fix: bugun/yarin/X Mart/cumartesi/bu hafta tarih algisi; sabah/ogleden once/ogle/ogleden sonra/aksam/gece zaman dilimi algisi
+- Zaman dilimi araliklari: sabah 05-17, ogleden once 00-12, ogle 11-13, ogleden sonra 12-24, aksam/gece 17-05
+- Haftanin gunu algisi: pazartesi-pazar tum gunler
+- Sesle gorev ekleme: intent algisi, saat ve tarih cikarimi, TTS onay mesaji
+- Gorev ekleme sayfasina saat secici eklendi (showTimePicker)
+- Conversation history: son 5 tur RAM'de, her istekte backend'e gonderiliyor
+- Hallusinasyon engelleme: has_no_tasks() kontrolu, model bypass
+- Intent ayirici: gorev → direkt metin, hava → OpenWeatherMap, sohbet → Groq
+- OpenWeatherMap entegrasyonu: 16 sehir algisi, Turkce hava durumu cevirisi
+- Groq API entegrasyonu: Llama 3.1 8B ile gundelik Turkce sohbet
+- HF Dedicated Endpoint entegrasyonu
+- dart-define ile token guvenligi (GitHub secret scanning bypas)
 
-- Dependency injection duzeltmesi: VoiceCubit'e TaskBloc inject edilmemesinden kaynaklanan crash sorunu giderildi (injection_container.dart: registerFactory -> registerFactoryParam)
-- Ilk kurulum ekrani (first_setup_page.dart): hic profil yoksa animasyonlu hosgeldin ekrani, 2 adimli profil olusturma akisi (isim, PIN, rol secimi), otomatik dashboard yonlendirmesi
-- Demo seed verisi: ilk kullanici olusturulunca _seedDemoTasks() ile 16 ornek gorev otomatik ekleniyor (10-17 Mart 2026 arasi)
-- Context fix - akilli filtreleme (_buildTaskContext): "bugun", "yarin", "X Mart", "bu hafta" tarih algisi; "sabah" (06-12), "ogleden sonra" (12-18), "aksam" (18-22), "saat 14" gibi zaman dilimi algisi
-- Sesle gorev ekleme (_tryAddTaskFromVoice): "gorev ekle", "hatirla", "not al", "yeni gorev", "listeye ekle" intent algisi; saat cikarimi (saat 14:30, sabah->09:00, ogle->12:00, aksam->19:00, gece->21:00); tarih cikarimi (yarin, 15 mart); onay mesaji ile TTS dogrulamasi
-- Conversation history: son 5 tur (10 mesaj) RAM'de tutuluyor, her istekte backend'e gonderiliyor
-- Hallusinasyon engelleme: has_no_tasks() kontrolu ile gorev olmayan tarihlerde model devreye girmeden "planin bulunmuyor" yaniti donduruluyor; temperature=0.1 ve repetition_penalty=1.2 ile deterministic yanit
-- HF Dedicated Endpoint entegrasyonu: api_service.dart ve api_constants.dart HF API'ye donusturuldu, NGINX bagimliligı kaldirildi, Qwen prompt formati (system + history + GOREV LISTESI) eklendi
-- Offline mod: baglanti yoksa kural tabanli yerel yanitlar (_buildOfflineResponse)
+**LLM ve Backend**
 
-### LLM ve Backend
-
-- Model secim sureci: LLaMA 1.5B -> Qwen2.5-1.5B -> Qwen2.5-3B degerlendirmesi
-- QLoRA fine-tuning: 4-bit NF4 quantization, LoRA r=8/alpha=16, 7 hedef modul, 3350 Turkce ornek, 3 epoch, final loss ~0.13, ~1.5-2 saat (RTX 4060)
-- Dataset revizyonu: 1521 yerde "March" -> "Mart" donusumu; "en yogun gun", "en az yogun gun", "bos saatler" sorulari duzeltildi; 300 sesle gorev ekleme ornegi ve 50 sohbet ornegi eklendi; Flutter'in {tasks:[...]} formatina uygun hale getirildi
-- FastAPI backend (main.py): 3 endpoint (/status, /infer, /voice/process), conversation history, hallusinasyon engelleme, Prometheus metrikleri
-- NGINX TLS proxy: port 8443 -> 8000, self-signed sertifika destegi
-- Prometheus izleme: 5 custom metrik (voice_requests_total, ai_response_seconds, hallucination_blocked_total, model_ready, voice_task_added_total), /metrics endpoint
-- Grafana dashboard: 8 panel (JSON dosyasi backend/ klasorunde)
-- SQLite analiz scripti (analiz.py): 3 grafik + CSV ciktisi, demo veri destegi
-- Model merge: LoRA adaptoru + base model birlestirildi (qwen3b-merged, 5.8GB)
-- HF Dedicated Endpoint'e yukleme: Rudblest/AkilliAyna-Qwen3B
-- GitHub repo yonetimi: README, ekran goruntuleri, surum etiketleri, repo temizleme
-- TUBITAK raporu: Word (.docx) ve PDF formatinda (10 bolum)
-
----
-
-TUBITAK 2209-A - Firat Universitesi - 2025-2026
+- Qwen2.5-3B-Instruct secimi ve degerlendirilmesi
+- QLoRA fine-tuning: 4-bit NF4, LoRA r=8/alpha=16, 3350 Turkce ornek, loss ~0.13
+- Dataset revizyonu: 1521 yerde March→Mart, yanlis outputlar duzeltildi
+- 300 sesle gorev ekleme ornegi + 50 sohbet ornegi eklendi
+- FastAPI backend: 3 endpoint, conversation history, hallusinasyon engelleme
+- Prometheus izleme: 5 custom metrik
+- Grafana dashboard: 8 panel
+- SQLite analiz scripti (analiz.py): 3 grafik + CSV
+- Model merge + HF Dedicated Endpoint'e yukleme
+- Her iki GitHub reposu: README, ekran goruntuleri, surum etiketleri
+- TUBITAK raporu: Word ve PDF
 
 ---
 
 # PDF Proje Onerisi ile Gerceklesen Uygulama Arasindaki Farklar
 
-TUBITAK 2209-A basvuru formu (2024/1. Donem) ile teslim edilen uygulamanin teknik karsilastirmasi asagida verilmistir.
-
 | # | Konu | PDF'deki Plan | Gerceklesen | Degisikligin Nedeni |
 |---|------|--------------|-------------|---------------------|
-| 1 | Dil & Framework | Java (Android) + Swift (iOS) | Dart + Flutter | Tek kod tabanıyla cift platform ciktisi; gelistirme suresi yaklasik yuzde 40 kisaldi. Iki ayri ekip ve iki ayri kod tabani gerekmedi. |
-| 2 | Frontend | React Native | Flutter Widget sistemi | Native ARM'a derleme; JavaScript koprusu yok; sesli komut gecikmesi azaldi; 60 fps animasyon. |
-| 3 | AI Kutuphanesi | TensorFlow 2.x (dogrudan mobil) | HuggingFace Inference API | Model sunucuda kalir, telefona yalnizca cikarim sonucu gelir. Batarya ve RAM tasarrufu; model guncellemeleri uygulama yayinlamadan yapilir. |
-| 4 | NLP Kutuphanesi | NLTK (Python) | speech_to_text + flutter_tts (tr_TR) | NLTK sunucu taraflidir, mobil uygulama dogrudan konusamaz. Flutter paketleri cihaz ici ve bulut tanımayi sorunsuz entegre eder; Turkce aksanlar icin optimize. |
-| 5 | State Management | Belirtilmemis | BLoC/Cubit (TaskBloc, UserCubit, VoiceCubit) | Katmanli ve test edilebilir mimari. Yeni ozellik eklendiginde mevcut kod bozulmaz. |
-| 6 | Mimari | Mikro hizmetler + Docker | Clean Architecture (Presentation - Domain - Data) | Mikro hizmet bu olcek icin fazla karmasik. Clean Architecture ayni faydalari cok daha az altyapi maliyetiyle sunar. |
-| 7 | Dependency Injection | Belirtilmemis | GetIt 7.6.7 (Service Locator) | Test ortaminda mock enjeksiyonu kolaylasr; servisler merkezi yonetilir; prop drilling ortadan kalkar. |
-| 8 | PIN Guvenligi | Blockchain onerilmis | SHA-256 + Android Keystore / iOS Keychain | Blockchain bu olcek icin orantisiz. SHA-256 + Keystore endustri standardi; ham PIN hicbir zaman cihazda saklanmaz. |
-| 9 | TLS | TLS 1.2 | Sertifika parmak izi dogrulamasi (Dio interceptor) | MITM saldirilarinа karsi ek katman. Gelistirmede self-signed sertifika destegi ile sertifika maliyeti olmadan test edilir. |
-| 10 | Veritabani | SQLite 3.x | sqflite 2.3.3 (migration destekli v2 semasi) | Ayni teknoloji, Flutter uyumlu sarmalayici. Migration destegi sayesinde uygulama guncellemelerinde mevcut kullanici verileri kaybolmaz. |
-| 11 | HTTP Istemcisi | Belirtilmemis | Dio 5.4.3 (interceptor, retry, TLS) | Authorization, X-Device-ID ve X-API-Version basliklari tum isteklere otomatik eklenir. |
-| 12 | Hata Yonetimi | Belirtilmemis | Either<Failure, T> — dartz 0.10.1 | Derleyici hata durumlarini islemeyi zorunlu kilar. Runtime exception yerine ongorelebilir hata akisi. |
-| 13 | Izleme Araclari | Prometheus + Grafana + Nagios | flutter_local_notifications 17.0.0 | Prometheus/Grafana/Nagios sunucu altyapisi gerektirir. Lokal bildirimler kullanici deneyimini dogrudan etkiler (ileri izleme v1.1'e ertelendi). |
-| 14 | Coklu Kullanici | Kavramsal duzeyде onerılmıs | PIN dogrulama + Admin/Member rol sistemi + profil degisiminde anlik veri sifirlama | Her aile uyesinin gorevleri tamamen izole. Profil gecisi PIN gerektirdiginden mahremiyet korunur. |
-| 15 | Gorev Yonetimi | Temel plan, gorev, hatirlatma | 4 oncelik seviyesi + 7 kategori + tam metin arama + otomatik gizleme (24 saat) + swipe-to-delete | Kullanici en kritik gorevlere aninda odaklanabilir. Tamamlanan gorevlerin otomatik gizlenmesi arayuzu temiz tutar. |
-| 16 | Danisman Unvani | Dr. Sinem Akyol | Doc. Dr. Sinem Akyol | Guncel akademik unvan ile dogruluk ve kurumsal taninirlik saglandi. |
-| 17 | Cevrimdisi Mod | Belirtilmemis | Kural tabanli yerel yanit motoru (_buildOfflineResponse) | Ag baglantisi garanti edilemez. Yerel motor temel sorgulari cevrimdisi yanitlar; hata mesaji yerine anlamli yanit doner. |
-| 18 | Turkce Karakter Destegi | Belirtilmemis | Noto Sans font + intl paketi (tr_TR locale) | Varsayilan sistem fontlari bazi Android surumlerinde Turkce karakterleri hatali render eder. |
+| 1 | Dil & Framework | Java (Android) + Swift (iOS) | Dart + Flutter | Tek kod tabaniyla cift platform; gelistirme suresi ~%40 kisaldi |
+| 2 | Frontend | React Native | Flutter Widget sistemi | Native ARM derleme; JavaScript koprusu yok; 60 fps |
+| 3 | AI Kutuphanesi | TensorFlow 2.x (mobil) | Groq API + HF Endpoint | Model sunucuda kalir, telefona sadece yanit gelir |
+| 4 | NLP Kutuphanesi | NLTK (Python) | speech_to_text + flutter_tts | NLTK sunucu taraflidir, mobil konusamaz |
+| 5 | State Management | Belirtilmemis | BLoC/Cubit | Katmanli, test edilebilir mimari |
+| 6 | Mimari | Mikro hizmetler + Docker | Clean Architecture | Mikro hizmet bu olcek icin fazla karmasik |
+| 7 | Dependency Injection | Belirtilmemis | GetIt 7.6.7 | Merkezi servis yonetimi |
+| 8 | PIN Guvenligi | Blockchain onerilmis | SHA-256 + Keystore | Blockchain orantisiz; SHA-256 endustri standardi |
+| 9 | TLS | TLS 1.2 | dart-define ile token guvenligi | Hardcode IP sorununun kokten cozumu |
+| 10 | Veritabani | SQLite 3.x | sqflite 2.3.3 migration destekli | Guncelleme sirasinda kullanici verisi kaybolmuyor |
+| 11 | HTTP Istemcisi | Belirtilmemis | Dio 5.4.3 | Otomatik header, retry, hata yonetimi |
+| 12 | Hata Yonetimi | Belirtilmemis | Either<Failure, T> dartz | Derleyici hata islemeyi zorunlu kilar |
+| 13 | Izleme | Prometheus + Grafana + Nagios | flutter_local_notifications | Lokal bildirimler kullanici icin daha kritik |
+| 14 | Coklu Kullanici | Kavramsal | PIN + Admin/Member rol sistemi | Her aile uyesinin gorevleri tamamen izole |
+| 15 | Gorev Yonetimi | Temel plan/gorev | 4 oncelik + 7 kategori + swipe-to-delete + otomatik gizleme | Kullanici en kritik gorevlere odaklanabilir |
+| 16 | Danisman Unvani | Dr. Sinem Akyol | Doc. Dr. Sinem Akyol | Guncel akademik unvan |
+| 17 | Cevrimdisi Mod | Belirtilmemis | Kural tabanli yerel yanit motoru | Ag baglantisi garanti edilemez |
+| 18 | Turkce Karakter | Belirtilmemis | Noto Sans + intl paketi tr_TR | Bazi Android surumleri Turkce karakteri hatali render eder |
+
+---
+
+# Ana Repo (Backend + LLM)
+
+Backend, fine-tuning scriptleri, Prometheus/Grafana ve model egitimi:
+https://github.com/RudblestThe2nd/AkilliAynaAsistanLLM
+
+HuggingFace Model:
+https://huggingface.co/Rudblest/AkilliAyna-Qwen3B
 
 ---
 
 TUBITAK 2209-A - Firat Universitesi - 2025-2026
+Danisman: Doc. Dr. Sinem Akyol

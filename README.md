@@ -191,59 +191,79 @@ Ilk acilista mutlaka profil olusturun. Profil olmadan dashboard bos gelir.
 
 ---
 
-# Gelistirici Katkilari
+## Efor Dagilimi
 
-## Sevval Kaya - Flutter Mobil Uygulama
+### Sevval Kaya — %25
 
-Flutter uygulamasinin tamamini sifirdan gelistirdi:
+Flutter uygulamasinin temel iskeleti:
 
-- Clean Architecture mimarisi (Presentation / Domain / Data / Core katmanlari)
-- TaskBloc: gorev CRUD, filtreleme, tamamlama, arama
-- UserCubit: coklu kullanici, SHA-256 PIN, rol sistemi (Admin/Member/Guest)
-- VoiceCubit: STT, AI ve TTS akis yonetimi altyapisi
-- SQLite veritabani: tasks ve users tablolari, migration destekli v2
-- Sayfalar: consent_page, dashboard_page, tasks_page, profile_page
-- Widgetlar: task_card_widget (swipe-to-delete), voice_assistant_widget
-- flutter_secure_storage ile token sifreleme
-- flutter_local_notifications ile gorev hatirlatic
-- Noto Sans font, koyu tema, animate_do animasyonlari
-- Fiziksel ayna kurulumu: Bluetooth mikrofon ve hoparlor montaji
+- Clean Architecture mimarisi kurulumu
+- TaskBloc, UserCubit, VoiceCubit altyapisi
+- SQLite veritabani tasarimi (tasks, users tablolari)
+- Tum sayfalar: consent_page, dashboard_page, tasks_page, profile_page
+- Widgetlar: task_card_widget, voice_assistant_widget
+- Koyu tema, Noto Sans font, animasyonlar
+- Fiziksel ayna uzerinde Bluetooth mikrofon ve hoparlor montaji
 
-## Berkay Parcal + Esra Kazan - LLM, Backend ve Entegrasyon
+---
 
-**Flutter Uygulamasina Eklenenler**
+### Berkay Parcal — %45
 
-- Dependency injection fix: VoiceCubit'e TaskBloc inject edilmemesinden kaynaklanan crash giderildi
-- Ilk kurulum ekrani (first_setup_page.dart): animasyonlu hosgeldin, 2 adimli profil akisi
-- Demo seed verisi: ilk kullanici olusturulunca 16 ornek gorev otomatik ekleniyor
-- Context fix: bugun/yarin/X Mart/cumartesi/bu hafta tarih algisi; sabah/ogleden once/ogle/ogleden sonra/aksam/gece zaman dilimi algisi
-- Zaman dilimi araliklari: sabah 05-17, ogleden once 00-12, ogle 11-13, ogleden sonra 12-24, aksam/gece 17-05
-- Haftanin gunu algisi: pazartesi-pazar tum gunler
-- Sesle gorev ekleme: intent algisi, saat ve tarih cikarimi, TTS onay mesaji
-- Gorev ekleme sayfasina saat secici eklendi (showTimePicker)
-- Conversation history: son 5 tur RAM'de, her istekte backend'e gonderiliyor
-- Hallusinasyon engelleme: has_no_tasks() kontrolu, model bypass
-- Intent ayirici: gorev → direkt metin, hava → OpenWeatherMap, sohbet → Groq
-- OpenWeatherMap entegrasyonu: 16 sehir algisi, Turkce hava durumu cevirisi
-- Groq API entegrasyonu: Llama 3.1 8B ile gundelik Turkce sohbet
-- HF Dedicated Endpoint entegrasyonu
-- dart-define ile token guvenligi (GitHub secret scanning bypas)
+### Flutter uygulamasinin temel iskeleti Teslim Ettigi Uygulamadaki Kritik Sorunlar
+
+Sevval'in teslim ettigi uygulama ilk calismada birden fazla kritik sorunla geldi. Bu sorunlarin tamamini tespit edip duzeltmek Esra ve Berkay'a dustu:
+
+**VoiceCubit crash**
+Sesli komut butonuna basildiginda uygulama cokuyordu. Sebebi `injection_container.dart`'ta VoiceCubit'e TaskBloc inject edilmemesiydi. `registerFactory` → `registerFactoryParam` degisikligi ile duzeltildi.
+**Ilk acilista login ekrani yoktu**
+Uygulama direkt dashboard'a aciliyordu, hic profil yoktu, gorev yoktu, context bosti, model hep "planin bulunmuyor" diyordu. `first_setup_page.dart` sifirdan yazildi; animasyonlu hosgeldin ekrani, 2 adimli profil olusturma akisi ve otomatik dashboard yonlendirmesi eklendi.
+**Demo verisi yoktu**
+Uygulamayi test etmek icin her seferinde elle gorev girilmesi gerekiyordu. Her acilista sifirdan gorev eklemek test surecini ciddi sekilde zorlastirdi. `_seedDemoTasks()` fonksiyonu yazildi, ilk kullanici olusturulunca 16 ornek gorev otomatik ekleniyor.
+**Saat alani yoktu**
+Gorev ekleme ekraninda tarih secici vardi ama saat secici yoktu. Butun gorevler 00:00 saatiyle kaydediliyordu. Bu yuzden "bugun sabah ne var" sorgusuna hic yanit gelmiyordu, filtreler hep bos donuyordu. `showTimePicker` eklendi, tarih secilince saat secici otomatik aciyor, saat bilgisi `dueDate`'e isleniyor.
+**Context bos geliyordu**
+`VoiceCubit`'teki `_buildTaskContext` fonksiyonu gorev tarihlerini yanlis filtreliyordu, `dueDate` null olan gorevleri atliyordu. Akilli filtreleme yeniden yazildi: bugun/yarin/X Mart/bu hafta tarih algisi ve sabah/ogleden once/ogle/ogleden sonra/aksam/gece zaman dilimi algisi eklendi.
+**`ai_remote_datasource.dart` dead code**
+Dosyanin aciklamasi "NGINX AI endpoint istemcisi" yaziyordu. NGINX nerede? Raspberry Pi'da. Raspberry Pi nerede? Yok. Model nerede calisacakti? Telefonda. Telefon 8GB modeli kaldirabilir mi? Hayir. Bu dosya hic cagrilmadan projede kaldi, tum AI cagrilan `api_service.dart` uzerinden yeniden yazildi.
+**`192.168.1.100` hardcode IP**
+`security_layer.dart` TLS sertifika parmak izi dogrulamasi, JWT token ve cihaz ID sifreleme ile guc gosterisi yapiyordu. Bunlarin hepsi `192.168.1.100` IP'sine baglaniyor. Baska aga gecinle baglanti aninda kesildi. Guvenlik katmani o kadar saglamdi ki kendini de mahkum etti. `dart-define` ile environment variable'a tasindi, HF Endpoint'e gecildi, IP bagimliliginin koku kazindi.
+**`IAiRemoteDataSource` inject edilmemisti**
+Interface var, class var, GetIt'e kayitli, her sey mevcut. Bir tek eksik: VoiceCubit'e inject edilmemis. Sesli komut butonuna basilinca uygulama `Null check operator used on a null value` hatasi ile aninda cokuyor. `injection_container.dart`'ta `registerFactory` → `registerFactoryParam` ile duzeltildi.
+
+**Yeni Ozellikler**
+
+- Intent ayirici modul (api_service.dart): gorev sorusu → direkt metin, hava → OpenWeatherMap, sohbet → Groq
+- Conversation history: son 5 tur RAM'de, her istekte API'ye gonderiliyor
+- Hallusinasyon engelleme: has_no_tasks() kontrolu, gorev yoksa model devreye girmiyor
+- Model bypass: gorev sorgularinda model uydurma yapiyor, direkt metin uretimi ile sifir hallusinasyon
+- Groq API entegrasyonu: Llama 3.1 8B ile gundelik Turkce sohbet modulu
+- OpenWeatherMap entegrasyonu: 16 sehir algisi, Turkce cevirisi, gercek zamanli veri
+- Offline mod: baglanti yoksa kural tabanli yerel yanitlar
 
 **LLM ve Backend**
 
-- Qwen2.5-3B-Instruct secimi ve degerlendirilmesi
-- QLoRA fine-tuning: 4-bit NF4, LoRA r=8/alpha=16, 3350 Turkce ornek, loss ~0.13
-- Dataset revizyonu: 1521 yerde March→Mart, yanlis outputlar duzeltildi
-- 300 sesle gorev ekleme ornegi + 50 sohbet ornegi eklendi
-- FastAPI backend: 3 endpoint, conversation history, hallusinasyon engelleme
-- Prometheus izleme: 5 custom metrik
-- Grafana dashboard: 8 panel
-- SQLite analiz scripti (analiz.py): 3 grafik + CSV
-- Model merge + HF Dedicated Endpoint'e yukleme
-- Her iki GitHub reposu: README, ekran goruntuleri, surum etiketleri
-- TUBITAK raporu: Word ve PDF
+- Model secim sureci ve karsilastirmasi: LLaMA 1.5B → Qwen2.5-1.5B → Qwen2.5-3B
+- QLoRA fine-tuning: 4-bit NF4 quantization, LoRA r=8/alpha=16, 7 modul, 3350 Turkce ornek, 3 epoch, final loss ~0.13, RTX 4060 uzerinde ~1.5-2 saat
+- Dataset revizyonu: 1521 yerde March → Mart donusumu, yanlis outputlar duzeltildi
+- FastAPI backend: 3 endpoint, conversation history, hallusinasyon engelleme, Prometheus metrikleri
+- Prometheus izleme: 5 custom metrik (voice_requests_total, ai_response_seconds, hallucination_blocked_total, model_ready, voice_task_added_total)
+- Grafana dashboard: 8 panel, JSON dosyasi
+- SQLite analiz scripti (analiz.py): 3 grafik uretimi + CSV ciktisi
+- Model merge: LoRA adaptoru + base model birlestirme (5.8GB)
+- HF Dedicated Endpoint'e yukleme: Rudblest/AkilliAyna-Qwen3B
 
 ---
+
+### Esra Kazan — %30
+
+- QLoRA fine-tuning icin dataset hazirlanmasi ve veri temizligi
+- 3000 ornek uzerinde cikti kalitesi kontrolu ve duzeltmesi
+- Sesle gorev ekleme intent orneklerinin yazilmasi (300 ornek)
+- Genel sohbet orneklerinin yazilmasi (50 ornek)
+- SQLite veritabanindan veri analizi: pandas, matplotlib ile 3 grafik
+- Prometheus/Grafana kurulumu ve yapilandirmasi
+- TUBITAK raporu yazimi ve duzenlenmesi
+- Test senaryolari hazirlama ve uygulama uzerinde test
 
 # PDF Proje Onerisi ile Gerceklesen Uygulama Arasindaki Farklar
 

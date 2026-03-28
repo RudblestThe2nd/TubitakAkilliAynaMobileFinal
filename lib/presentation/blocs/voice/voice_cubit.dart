@@ -89,7 +89,7 @@ class VoiceCubit extends Cubit<VoiceState> {
 
   void _configureTts() {
     _tts.setLanguage('tr-TR');
-    _tts.setSpeechRate(1.0);
+    _tts.setSpeechRate(0.5);
     _tts.setVolume(1.0);
     _tts.setPitch(1.0);
 

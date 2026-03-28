@@ -26,8 +26,8 @@ class AppConstants {
   static const Duration animSlow = Duration(milliseconds: 700);
 
   // ── Ses Tanıma ────────────────────────────────────────────────────────────
-  static const Duration voiceListenTimeout = Duration(seconds: 5);
-  static const Duration voicePauseThreshold = Duration(seconds: 2);
+  static const Duration voiceListenTimeout = Duration(seconds: 30);
+  static const Duration voicePauseThreshold = Duration(seconds: 4);
   static const double voiceConfidenceThreshold = 0.75;
 
   // ── Güvenlik ─────────────────────────────────────────────────────────────

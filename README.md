@@ -92,7 +92,7 @@ Gundelik sohbet, motivasyon, genel sorularda Groq API uzerinden Llama 3.1 8B mod
 | Gorev AI | Direkt Metin Uretimi | Model bypass, hallusinasyon yok |
 | Sohbet AI | Groq API (Llama 3.1 8B) | Gundelik sohbet |
 | Hava Durumu | OpenWeatherMap API | Gercek zamanli veri |
-| Fine-tuned Model | Qwen2.5-3B (HF Endpoint) | Yedek, suanda bypass |
+| Fine-tuned Model | Qwen2.5-3B (HF Endpoint) | Kullanılan Dil Modeli |
 | Ses Tanima | speech_to_text (tr_TR) | |
 | Ses Sentezi | flutter_tts (tr-TR) | |
 | Veritabani | SQLite (sqflite 2.3.3) | Migration destekli v2 |

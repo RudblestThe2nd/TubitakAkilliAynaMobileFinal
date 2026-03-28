@@ -4,7 +4,7 @@ TUBITAK 2209-A - Yapay Zeka Destekli Akilli Ayna Projesi
 Flutter Android Mobil Uygulama
 
 Danisman: Doc. Dr. Sinem Akyol
-Koordinator: Sevval Kaya
+Proje Yürütücüsü: Sevval Kaya
 Gelistirici: Berkay Parcal
 Gelistirici: Esra Kazan
 Kurum: Firat Universitesi
@@ -169,9 +169,9 @@ Ilk acilista mutlaka profil olusturun. Profil olmadan dashboard bos gelir.
 
 ---
 
-## Efor Dagilimi
+## Teknik Sorumluluklar
 
-### Sevval Kaya — %30
+### Sevval Kaya
 
 Flutter uygulamasinin temel iskeleti:
 
@@ -185,7 +185,7 @@ Flutter uygulamasinin temel iskeleti:
 
 ---
 
-### Berkay Parcal — %40
+### Berkay Parcal
 
 
 **Yeni Ozellikler**
@@ -195,13 +195,13 @@ Flutter uygulamasinin temel iskeleti:
 - Hallusinasyon engelleme: has_no_tasks() kontrolu, gorev yoksa model devreye girmiyor
 - Model bypass: gorev sorgularinda model uydurma yapiyor, direkt metin uretimi ile sifir hallusinasyon
 - Groq API entegrasyonu: Llama 3.1 8B ile gundelik Turkce sohbet modulu
-- OpenWeatherMap entegrasyonu: 16 sehir algisi, Turkce cevirisi, gercek zamanli veri
+- OpenWeatherMap entegrasyonu: 81 sehir algisi, Turkce cevirisi, gercek zamanli veri
 - Offline mod: baglanti yoksa kural tabanli yerel yanitlar
 
 **LLM ve Backend**
 
 - Model secim sureci ve karsilastirmasi: LLaMA 1.5B → Qwen2.5-1.5B → Qwen2.5-3B
-- QLoRA fine-tuning: 4-bit NF4 quantization, LoRA r=8/alpha=16, 7 modul, 3350 Turkce ornek, 3 epoch, final loss ~0.13, RTX 4060 uzerinde ~1.5-2 saat
+- QLoRA fine-tuning: 4-bit NF4 quantization, LoRA r=8/alpha=16, 7 modul, 3350 Turkce ornek, 12 epoch, final loss ~0.13, RTX 4060 uzerinde ~4-5 saat
 - Dataset revizyonu: 1521 yerde March → Mart donusumu, yanlis outputlar duzeltildi
 - FastAPI backend: 3 endpoint, conversation history, hallusinasyon engelleme, Prometheus metrikleri
 - Prometheus izleme: 5 custom metrik (voice_requests_total, ai_response_seconds, hallucination_blocked_total, model_ready, voice_task_added_total)
@@ -212,7 +212,7 @@ Flutter uygulamasinin temel iskeleti:
 
 ---
 
-## Esra Kazan — %30
+### Esra Kazan
 
 - QLoRA fine-tuning icin dataset hazirlanmasi ve veri temizligi
 - 3000 ornek uzerinde cikti kalitesi kontrolu ve duzeltmesi
@@ -223,22 +223,22 @@ Flutter uygulamasinin temel iskeleti:
 - TUBITAK raporu yazimi ve duzenlenmesi
 - Test senaryolari hazirlama ve uygulama uzerinde test
 
-### Esra Kazan ve Berkay Parçal Ortak çalışma 
+### Berkay Parcal ve Esra Kazan - Ortak Calisma
 
-#### Flutter Uygulamasındaki Kritik Sorunlar
+#### Teknik Iyilestirmeler ve Optimizasyonlar
 
-uygulama ilk calismada birden fazla kritik sorunla geldi. Bu sorunlarin tamamini tespit edip duzeltmek Berkay ve Esra'ya dustu:
+Uygulama entegrasyon surecinde tespit edilen teknik eksiklikler analiz edilmis ve asagidaki iyilestirmeler gerceklestirilmistir:
 
-| # | Sorun | Aciklama | Cozum |
+| # | Iyilestirme Alani | Teknik Durum | Uygulanan Cozum |
 |---|-------|----------|-------|
-| 1 | **VoiceCubit crash** | Sesli komut butonuna basildiginda uygulama aninda cokuyordu. `injection_container.dart`'ta VoiceCubit'e TaskBloc inject edilmemisti. | `registerFactory` → `registerFactoryParam` degisikligi yapildi. |
-| 2 | **Ilk acilista login ekrani yoktu** | Uygulama direkt dashboard'a aciliyordu. Hic profil yoktu, gorev yoktu, context bosti, model hep "planin bulunmuyor" diyordu. | `first_setup_page.dart` sifirdan yazildi; animasyonlu hosgeldin ekrani, 2 adimli profil olusturma akisi ve otomatik dashboard yonlendirmesi eklendi. |
-| 3 | **Demo verisi yoktu** | Her acilista sifirdan elle gorev girilmesi gerekiyordu, bu test surecini ciddi sekilde zorlastirdi. | `_seedDemoTasks()` yazildi, ilk kullanici olusturulunca 16 ornek gorev otomatik ekleniyor. |
-| 4 | **Saat alani yoktu** | Tarih secici vardi ama saat secici yoktu. Tum gorevler 00:00 saatiyle kaydediliyordu. "Bugun sabah ne var" sorgusuna hic yanit gelmiyordu, filtreler hep bos donuyordu. | `showTimePicker` eklendi, tarih secilince saat secici otomatik aciyor, saat `dueDate`'e isleniyor. |
-| 5 | **Context bos geliyordu** | `_buildTaskContext` gorev tarihlerini yanlis filtreliyordu, `dueDate` null olan gorevleri atliyordu. | Akilli filtreleme yeniden yazildi: bugun/yarin/X Mart/bu hafta tarih algisi ve sabah/ogleden once/ogle/ogleden sonra/aksam/gece zaman dilimi algisi eklendi. |
-| 6 | **`ai_remote_datasource.dart` dead code** | Dosyanin aciklamasi "NGINX AI endpoint istemcisi" yaziyordu. NGINX nerede? Raspberry Pi'da. Raspberry Pi nerede? Yok. Model telefonda mi calisacakti? 8GB model icin telefon RAM'i yetmez. Bu dosya hic cagrilmadan projede kaldi. | Tum AI cagrilan `api_service.dart` uzerinden sifirdan yazildi. |
-| 7 | **`192.168.1.100` hardcode IP** | `security_layer.dart` TLS, JWT token ve cihaz ID sifreleme ile guc gosterisi yapiyordu ama hepsi `192.168.1.100`'e bagliydi. Baska aga gecinle baglanti aninda kesildi.  | `dart-define` ile environment variable'a tasindi, HF Endpoint'e gecildi, IP bagimliliginin koku kazindi. |
-| 8 | **`IAiRemoteDataSource` inject edilmemisti** | Interface var, class var, GetIt'e kayitli, her sey mevcut. Bir tek eksik: VoiceCubit'e inject edilmemis. Sesli komut butonuna basilinca `Null check operator used on a null value` hatasi ile uygulama cokuyor. | `injection_container.dart`'ta `registerFactory` → `registerFactoryParam` ile duzeltildi. |
+| 1 | **VoiceCubit bagimlilik grafigi optimize edildi** | `VoiceCubit` bileseni `TaskBloc` bagimliligini servis lokatorundan alamamaktaydi; bu durum sesli komut modülünün baslatilamamasina yol acmaktaydi. | `injection_container.dart` dosyasinda `registerFactory` yapisi `registerFactoryParam` olarak guncellendi. |
+| 2 | **Ilk kullanici akisi eklendi** | Uygulama ilk acilisinda kullanici profili olusturma asamasi bulunmamaktaydi; bu durum bos veri ile baslatilan sistemi islevsiz kilmaktaydi. | `first_setup_page.dart` modulu gelistirildi; profil olusturma akisi, rol secimi ve otomatik oturum yonlendirmesi eklendi. |
+| 3 | **Baslangic verisi olusturma mekanizmasi eklendi** | Test ve gelistirme sureclerinde her oturumda veri girisi yapilmasi gerekiyordu. | `_seedDemoTasks()` fonksiyonu gelistirildi; ilk kullanici olusturuldigunda 16 ornek gorev otomatik olarak sisteme eklenmektedir. |
+| 4 | **Gorev zamanlama altyapisi guclendirildi** | Gorev olusturma ekraninda yalnizca tarih secimi bulunmakta, saat bilgisi kaydedilmemekteydi. Bu durum zaman dilimi filtrelemesinin calismamasina yol acmaktaydi. | `showTimePicker` entegre edildi; tarih seciminin ardindan saat bilgisi otomatik olarak alinmakta ve `dueDate` alanina islenmektedir. |
+| 5 | **Baglamsal veri filtreleme motoru yeniden yapilandirildi** | `_buildTaskContext` fonksiyonu tarih ve zaman dilimi filtrelerini dogru uygulayamamaktaydi; AI modeline iletilen baglam bos kalmaktaydi. | Tarih algisi (bugun, yarin, belirli tarih, haftalik) ve zaman dilimi siniflandirmasi (sabah, ogleden once, ogle, ogleden sonra, aksam, gece) iceren filtre motoru sifirdan gelistirildi. |
+| 6 | **AI veri kaynagi mimarisi guncellendi** | Basvuru formunda planlanan NGINX + Raspberry Pi mimarisi donanim kisitlari nedeniyle hayata gecirilememistir. Mevcut `ai_remote_datasource.dart` modulu bu mimariye bagimli kalmaktaydi. | Tum AI cagrilan `api_service.dart` uzerinden yeniden yapilandirildi; HF Dedicated Endpoint, Groq API ve OpenWeatherMap entegrasyonlari bu modul uzerinden saglanmaktadir. |
+| 7 | **API yapilandirmasi ortam degiskenlerine tasindi** | Baslangic gelistirme ortaminda sabit IP adresi kullanilmaktaydi. Bu yaklasim farkli ag ortamlarinda baglanti sorunlarina yol acmaktaydi. | Tum API endpoint ve token bilgileri `dart-define` mekanizmasiyla ortam degiskenlerine tasindi; boylece yapinin tasinirligi ve guvenligi arttirildi. |
+| 8 | **Bagimlilik enjeksiyonu tamamlandi** | `VoiceCubit` bileseni icin `IAiRemoteDataSource` bagimliliginin servis lokatoruna kaydedilmemesi nedeniyle sesli komut modulu calisamamaktaydi. | `injection_container.dart` dosyasinda `registerFactory` yapisi `registerFactoryParam` olarak guncellendi; bagimlilik grafiklerindeki eksiklik giderildi. |
 
 # PDF Proje Onerisi ile Gerceklesen Uygulama Arasindaki Farklar
 
@@ -259,9 +259,8 @@ uygulama ilk calismada birden fazla kritik sorunla geldi. Bu sorunlarin tamamini
 | 13 | Izleme | Prometheus + Grafana + Nagios | flutter_local_notifications | Lokal bildirimler kullanici icin daha kritik |
 | 14 | Coklu Kullanici | Kavramsal | PIN + Admin/Member rol sistemi | Her aile uyesinin gorevleri tamamen izole |
 | 15 | Gorev Yonetimi | Temel plan/gorev | 4 oncelik + 7 kategori + swipe-to-delete + otomatik gizleme | Kullanici en kritik gorevlere odaklanabilir |
-| 16 | Danisman Unvani | Dr. Sinem Akyol | Doc. Dr. Sinem Akyol | Guncel akademik unvan |
-| 17 | Cevrimdisi Mod | Belirtilmemis | Kural tabanli yerel yanit motoru | Ag baglantisi garanti edilemez |
-| 18 | Turkce Karakter | Belirtilmemis | Noto Sans + intl paketi tr_TR | Bazi Android surumleri Turkce karakteri hatali render eder |
+| 16 | Cevrimdisi Mod | Belirtilmemis | Kural tabanli yerel yanit motoru | Ag baglantisi garanti edilemez |
+| 17 | Turkce Karakter | Belirtilmemis | Noto Sans + intl paketi tr_TR | Bazi Android surumleri Turkce karakteri hatali render eder |
 
 ---
 

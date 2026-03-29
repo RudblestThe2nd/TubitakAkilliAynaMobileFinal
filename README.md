@@ -1,10 +1,10 @@
-# Akilli Ayna - Flutter Mobil Uygulama
+﻿# Akilli Ayna - Flutter Mobil Uygulama
 
 TUBITAK 2209-A - Yapay Zeka Destekli Akilli Ayna Projesi
 Flutter Android Mobil Uygulama
 
 Danisman: Doc. Dr. Sinem Akyol
-Koordinator: Sevval Kaya
+Proje Yurutucusu: Sevval Kaya
 Gelistirici: Berkay Parcal
 Gelistirici: Esra Kazan
 Kurum: Firat Universitesi
@@ -38,7 +38,7 @@ Kullanici Bluetooth mikrofona konusur, uygulama sesi metne cevirir, yapay zeka m
 # Sistem Mimarisi
 
 
-Gorev sorgularinda (bugun ne var, yarin programim vb.) Kendi eğittiğim model olan AkilliAyna-Qwen3B  kullanılır.
+Gorev sorgularinda (bugun ne var, yarin programim vb.) proje kapsaminda gelistirilen AkilliAyna-Qwen3B modeli kullanilir.
 
 Hava durumu sorularinda OpenWeatherMap API kullanilir, gercek veri gelir.
 
@@ -70,7 +70,7 @@ Gundelik sohbet, motivasyon, genel sorularda Groq API uzerinden Llama 3.1 8B mod
 
 **Coklu Kullanici**
 
-- PIN korumal profiller (SHA-256)
+- PIN korumali profiller (SHA-256)
 - Admin / Member / Guest rol sistemi
 - Profil gecisinde gorevler aninda sifirlaniyor (gizlilik)
 - Ilk acilista animasyonlu kurulum ekrani
@@ -169,12 +169,13 @@ Ilk acilista mutlaka profil olusturun. Profil olmadan dashboard bos gelir.
 
 ---
 
-## Efor Dagilimi
+## Teknik Sorumluluklar ve Katkilar
 
-### Sevval Kaya — %30
+### Sevval Kaya
 
 Flutter uygulamasinin temel iskeleti:
 
+- Sistem mimarisinin (Clean Architecture) uctan uca tasarimi, teknoloji yigininin belirlenmesi ve moduller arasi veri akis standartlarinin koordinasyonu.
 - Clean Architecture mimarisi kurulumu
 - TaskBloc, UserCubit, VoiceCubit altyapisi
 - SQLite veritabani tasarimi (tasks, users tablolari)
@@ -185,15 +186,14 @@ Flutter uygulamasinin temel iskeleti:
 
 ---
 
-### Berkay Parcal — %40
-
+### Berkay Parcal
 
 **Yeni Ozellikler**
 
 - Intent ayirici modul (api_service.dart): gorev sorusu → direkt metin, hava → OpenWeatherMap, sohbet → Groq
 - Conversation history: son 5 tur RAM'de, her istekte API'ye gonderiliyor
 - Hallusinasyon engelleme: has_no_tasks() kontrolu, gorev yoksa model devreye girmiyor
-- Model bypass: gorev sorgularinda model uydurma yapiyor, direkt metin uretimi ile sifir hallusinasyon
+- Model bypass: gorev sorgularinda direkt metin uretimi ile sifir hallusinasyon
 - Groq API entegrasyonu: Llama 3.1 8B ile gundelik Turkce sohbet modulu
 - OpenWeatherMap entegrasyonu: 16 sehir algisi, Turkce cevirisi, gercek zamanli veri
 - Offline mod: baglanti yoksa kural tabanli yerel yanitlar
@@ -212,7 +212,7 @@ Flutter uygulamasinin temel iskeleti:
 
 ---
 
-## Esra Kazan — %30
+### Esra Kazan
 
 - QLoRA fine-tuning icin dataset hazirlanmasi ve veri temizligi
 - 3000 ornek uzerinde cikti kalitesi kontrolu ve duzeltmesi
@@ -223,22 +223,21 @@ Flutter uygulamasinin temel iskeleti:
 - TUBITAK raporu yazimi ve duzenlenmesi
 - Test senaryolari hazirlama ve uygulama uzerinde test
 
-### Esra Kazan ve Berkay Parçal Ortak çalışma 
 
-#### Flutter Uygulamasındaki Kritik Sorunlar
+#### Sistem Entegrasyonu ve Teknik Optimizasyon Surecleri (Ekip Calismasi)
 
-uygulama ilk calismada birden fazla kritik sorunla geldi. Bu sorunlarin tamamini tespit edip duzeltmek Berkay ve Esra'ya dustu:
+Uygulama gelistirme surecinde tespit edilen teknik sorunlar sistematik olarak analiz edilerek asagidaki iyilestirmeler gerceklestirilmistir:
 
 | # | Sorun | Aciklama | Cozum |
 |---|-------|----------|-------|
-| 1 | **VoiceCubit crash** | Sesli komut butonuna basildiginda uygulama aninda cokuyordu. `injection_container.dart`'ta VoiceCubit'e TaskBloc inject edilmemisti. | `registerFactory` → `registerFactoryParam` degisikligi yapildi. |
-| 2 | **Ilk acilista login ekrani yoktu** | Uygulama direkt dashboard'a aciliyordu. Hic profil yoktu, gorev yoktu, context bosti, model hep "planin bulunmuyor" diyordu. | `first_setup_page.dart` sifirdan yazildi; animasyonlu hosgeldin ekrani, 2 adimli profil olusturma akisi ve otomatik dashboard yonlendirmesi eklendi. |
-| 3 | **Demo verisi yoktu** | Her acilista sifirdan elle gorev girilmesi gerekiyordu, bu test surecini ciddi sekilde zorlastirdi. | `_seedDemoTasks()` yazildi, ilk kullanici olusturulunca 16 ornek gorev otomatik ekleniyor. |
-| 4 | **Saat alani yoktu** | Tarih secici vardi ama saat secici yoktu. Tum gorevler 00:00 saatiyle kaydediliyordu. "Bugun sabah ne var" sorgusuna hic yanit gelmiyordu, filtreler hep bos donuyordu. | `showTimePicker` eklendi, tarih secilince saat secici otomatik aciyor, saat `dueDate`'e isleniyor. |
-| 5 | **Context bos geliyordu** | `_buildTaskContext` gorev tarihlerini yanlis filtreliyordu, `dueDate` null olan gorevleri atliyordu. | Akilli filtreleme yeniden yazildi: bugun/yarin/X Mart/bu hafta tarih algisi ve sabah/ogleden once/ogle/ogleden sonra/aksam/gece zaman dilimi algisi eklendi. |
-| 6 | **`ai_remote_datasource.dart` dead code** | Dosyanin aciklamasi "NGINX AI endpoint istemcisi" yaziyordu. NGINX nerede? Raspberry Pi'da. Raspberry Pi nerede? Yok. Model telefonda mi calisacakti? 8GB model icin telefon RAM'i yetmez. Bu dosya hic cagrilmadan projede kaldi. | Tum AI cagrilan `api_service.dart` uzerinden sifirdan yazildi. |
-| 7 | **`192.168.1.100` hardcode IP** | `security_layer.dart` TLS, JWT token ve cihaz ID sifreleme ile guc gosterisi yapiyordu ama hepsi `192.168.1.100`'e bagliydi. Baska aga gecinle baglanti aninda kesildi.  | `dart-define` ile environment variable'a tasindi, HF Endpoint'e gecildi, IP bagimliliginin koku kazindi. |
-| 8 | **`IAiRemoteDataSource` inject edilmemisti** | Interface var, class var, GetIt'e kayitli, her sey mevcut. Bir tek eksik: VoiceCubit'e inject edilmemis. Sesli komut butonuna basilinca `Null check operator used on a null value` hatasi ile uygulama cokuyor. | `injection_container.dart`'ta `registerFactory` → `registerFactoryParam` ile duzeltildi. |
+| 1 | **VoiceCubit baslangic hatasi** | Sesli komut modulu tetiklendiginde uygulama hata vererek sonlaniyordu. `injection_container.dart`'ta VoiceCubit'e TaskBloc bagimliliginin tanimlanmamis oldugu tespit edildi. | `registerFactory` → `registerFactoryParam` guncellemesiyle bagimliligi enjeksiyonu tamamlandi. |
+| 2 | **Kullanici giris akisi eksikligi** | Uygulama baslangicta dogrudan dashboard ekranina yonlendiriyordu; kullanici profili olusturma akisi tanimli degildi. Bu durum bos kullanici baglami ve yetersiz veri ortamina yol acmaktaydi. | `first_setup_page.dart` gelistirildi; animasyonlu hosgeldin akisi, 2 adimli profil olusturma ve otomatik dashboard yonlendirmesi eklendi. |
+| 3 | **Test verisi yoktu** | Uygulama her baslatildiginda test verisi manuel olarak girilmesi gerekiyordu; bu durum entegrasyon ve regresyon test sureclerini onemli olcude yavaslatiyordu. | `_seedDemoTasks()` fonksiyonu gelistirildi; ilk kullanici olusturulunca 16 ornekle donanimli test ortami otomatik hazirlanmaktadir. |
+| 4 | **Saat alani eksikligi** | Gorev olusturma formunda tarih secici mevcut ancak saat girisi tanimlanmamisti. Tum gorevler varsayilan 00:00 degeriyle kaydedildiginden zaman dilimi tabanli sorgular (sabah, aksam vb.) sonuc dondurmuyordu. | `showTimePicker` entegre edildi; tarih seciminin ardindan saat secici otomatik acilmakta ve secilen deger `dueDate` alanina islenmektedir. |
+| 5 | **Gorev baglami bos geliyordu** | `_buildTaskContext` gorev tarihlerini yanlis filtreliyordu; `dueDate` degeri tanimli olmayan gorevler sorgu kapsaminin disinda kaliyordu. | Akilli filtreleme modulu yeniden tasarlandi: bugun/yarin/X Mart/bu hafta tarih algisi ve sabah/ogleden once/ogle/ogleden sonra/aksam/gece zaman dilimi algisi eklendi. |
+| 6 | **`ai_remote_datasource.dart` kullanilmayan modul** | Dosya "NGINX AI endpoint istemcisi" olarak tanimlanmisti; ancak hedeflenen sunucu altyapisi projede mevcut degildi ve 8GB model mobil cihaz RAM kapasitesinin cok otesindeydi. Modul hic cagirilmadan kod tabaninda bulunuyordu. | Tum AI cagrilan `api_service.dart` uzerinden yeniden tasarlandi ve sistem mimarisine dahil edildi. |
+| 7 | **`192.168.1.100` hardcode IP** | `security_layer.dart` TLS, JWT token ve cihaz ID sifreleme icerecek sekilde tasarlanmisti; ancak tum istekler statik bir IP adresine bagliydi. Farkli ag ortamlarinda baglanti kesilmekteydi. | `dart-define` ile environment variable yapisina tasindi, HF Endpoint'e gecildi, IP bagimliligi ortadan kaldirildi. |
+| 8 | **`IAiRemoteDataSource` inject edilmemisti** | Interface, sinif ve GetIt kaydi mevcuttu; ancak VoiceCubit'e dependency injection yapilmamisti. Sesli komut tetiklendiginde `Null check operator used on a null value` hatasiyla uygulama sonlaniyordu. | `injection_container.dart`'ta `registerFactory` → `registerFactoryParam` ile duzeltildi. |
 
 # PDF Proje Onerisi ile Gerceklesen Uygulama Arasindaki Farklar
 
